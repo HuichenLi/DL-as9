@@ -25,3 +25,7 @@ def main():
     data_directory = '/projects/training/bauh/AR/'
     class_list, train, test = getUCF101(base_directory=data_directory)
     print_confusion_matrix(class_list=class_list)
+
+
+if __name__ == '__main__':
+    main()
