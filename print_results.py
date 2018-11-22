@@ -5,9 +5,6 @@ NUM_CLASSES = 101
 
 def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.npy'):
     confusion_matrix = np.load(file_path)
-    number_of_examples = np.sum(confusion_matrix, axis=1)
-    for i in range(NUM_CLASSES):
-        confusion_matrix[i, :] = confusion_matrix[i, :] / np.sum(confusion_matrix[i, :])
 
     results = np.diag(confusion_matrix)
     indices = np.argsort(results)
@@ -16,10 +13,9 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
     sorted_list = sorted_list[indices]
     sorted_results = results[indices]
 
-    print(number_of_examples)
     for i in range(NUM_CLASSES):
         # print(sorted_list[i], sorted_results[i], number_of_examples[indices[i]])
-        print("%s & %.4f & %f \\\\" %(sorted_list[i], sorted_results[i], number_of_examples[i]))
+        print("%s & %.4f \\\\" %(sorted_list[i], sorted_results[i]))
 
 
 def main():
