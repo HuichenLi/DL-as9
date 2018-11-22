@@ -126,6 +126,8 @@ model.eval()
 test_accu = []
 random_indices = np.random.permutation(len(test[0]))
 t1 = time.time()
+pool_threads = Pool(8,maxtasksperchild=200)
+
 for i in range(0,len(test[0])-batch_size,batch_size):
     augment = False
     video_list = [(test[0][k],augment)
