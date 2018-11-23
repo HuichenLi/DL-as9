@@ -17,6 +17,7 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
         # print(sorted_list[i], sorted_results[i], number_of_examples[indices[i]])
         print("%s & %.4f \\\\" %(sorted_list[i], sorted_results[i]))
 
+    print_confusion_matrix(confusion_matrix)
     confusion_vs = []
     confusion_cs = []
     for i in range(NUM_CLASSES):
