@@ -17,6 +17,16 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
         # print(sorted_list[i], sorted_results[i], number_of_examples[indices[i]])
         print("%s & %.4f \\\\" %(sorted_list[i], sorted_results[i]))
 
+    confusion_vs = []
+    confusion_cs = []
+    for i in range(NUM_CLASSES):
+        for j in range(NUM_CLASSES):
+            confusion_vs.append(confusion_matrix[i][j])
+            confusion_cs.append([i, j])
+    confusion_vs, confusion_cs = zip(*sorted(zip(confusion_vs, confusion_cs), reverse=True))
+    for i in range(10):
+        print("%s & %s & %f \\\\" %(sorted_list[confusion_cs[0]], sorted_list[confusion_cs[1]], confusion_vs))
+
 
 def main():
     data_directory = '/projects/training/bauh/AR/'
