@@ -34,7 +34,7 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
 def main():
     data_directory = '/projects/training/bauh/AR/'
     class_list, train, test = getUCF101(base_directory=data_directory)
-    print_confusion_matrix(class_list=class_list)
+    print_confusion_matrix(class_list=class_list, file_path='3d_resnet_confusion_matrix.npy')
 
 
 if __name__ == '__main__':
