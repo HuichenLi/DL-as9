@@ -22,6 +22,8 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
     confusion_cs = []
     for i in range(NUM_CLASSES):
         for j in range(NUM_CLASSES):
+            if i == j:
+                continue
             confusion_vs.append(confusion_matrix[i][j])
             confusion_cs.append([i, j])
     confusion_vs, confusion_cs = zip(*sorted(zip(confusion_vs, confusion_cs), reverse=True))
