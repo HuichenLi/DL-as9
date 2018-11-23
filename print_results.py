@@ -26,7 +26,7 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
             confusion_cs.append([i, j])
     confusion_vs, confusion_cs = zip(*sorted(zip(confusion_vs, confusion_cs), reverse=True))
     for i in range(10):
-        print("%s & %s & %f \\\\" %(sorted_list[confusion_cs[0]], sorted_list[confusion_cs[1]], confusion_vs))
+        print("%s & %s & %f \\\\" %(sorted_list[confusion_cs[i][0]], sorted_list[confusion_cs[i][1]], confusion_vs[i]))
 
 
 def main():
