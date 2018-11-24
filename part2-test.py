@@ -13,7 +13,7 @@ import cv2
 
 IMAGE_SIZE = 224
 NUM_CLASSES = 101
-batch_size = 20
+# batch_size = 20
 num_of_epochs = 10
 
 
@@ -25,55 +25,55 @@ model = torch.load('3d_resnet.model')
 model.cuda()
 
 ##### TEST
-model.eval()
-test_accu = []
-random_indices = np.random.permutation(len(test[0]))
-t1 = time.time()
-pool_threads = Pool(8,maxtasksperchild=200)
-
-for i in range(0,len(test[0])-batch_size,batch_size):
-    augment = False
-    video_list = [(test[0][k],augment)
-                    for k in random_indices[i:(batch_size+i)]]
-    data = pool_threads.map(loadSequence, video_list)
-
-    next_batch = 0
-    for video in data:
-        if video.size==0: # there was an exception, skip this batch
-            next_batch = 1
-    if(next_batch==1):
-        continue
-
-    x = np.asarray(data,dtype=np.float32)
-    print(x.shape)
-    x = Variable(torch.FloatTensor(x)).cuda().contiguous()
-
-    y = test[1][random_indices[i:(batch_size+i)]]
-    y = torch.from_numpy(y).cuda()
-
-    # output = model(x)
-    with torch.no_grad():
-        h = model.conv1(x)
-        h = model.bn1(h)
-        h = model.relu(h)
-        h = model.maxpool(h)
-
-        h = model.layer1(h)
-        h = model.layer2(h)
-        h = model.layer3(h)
-        h = model.layer4[0](h)
-        # h = model.layer4[1](h)
-
-        h = model.avgpool(h)
-
-        h = h.view(h.size(0), -1)
-        output = model.fc(h)
-
-    prediction = output.data.max(1)[1]
-    accuracy = ( float( prediction.eq(y.data).sum() ) /float(batch_size))*100.0
-    test_accu.append(accuracy)
-    accuracy_test = np.mean(test_accu)
-print('Testing',accuracy_test,time.time()-t1)
+# model.eval()
+# test_accu = []
+# random_indices = np.random.permutation(len(test[0]))
+# t1 = time.time()
+# pool_threads = Pool(8,maxtasksperchild=200)
+#
+# for i in range(0,len(test[0])-batch_size,batch_size):
+#     augment = False
+#     video_list = [(test[0][k],augment)
+#                     for k in random_indices[i:(batch_size+i)]]
+#     data = pool_threads.map(loadSequence, video_list)
+#
+#     next_batch = 0
+#     for video in data:
+#         if video.size==0: # there was an exception, skip this batch
+#             next_batch = 1
+#     if(next_batch==1):
+#         continue
+#
+#     x = np.asarray(data,dtype=np.float32)
+#     # print(x.shape) # (20, 3, 16, 224, 224)
+#     x = Variable(torch.FloatTensor(x)).cuda().contiguous()
+#
+#     y = test[1][random_indices[i:(batch_size+i)]]
+#     y = torch.from_numpy(y).cuda()
+#
+#     # output = model(x)
+#     with torch.no_grad():
+#         h = model.conv1(x)
+#         h = model.bn1(h)
+#         h = model.relu(h)
+#         h = model.maxpool(h)
+#
+#         h = model.layer1(h)
+#         h = model.layer2(h)
+#         h = model.layer3(h)
+#         h = model.layer4[0](h)
+#         # h = model.layer4[1](h)
+#
+#         h = model.avgpool(h)
+#
+#         h = h.view(h.size(0), -1)
+#         output = model.fc(h)
+#
+#     prediction = output.data.max(1)[1]
+#     accuracy = ( float( prediction.eq(y.data).sum() ) /float(batch_size))*100.0
+#     test_accu.append(accuracy)
+#     accuracy_test = np.mean(test_accu)
+# print('Testing',accuracy_test,time.time()-t1)
 
 ##### save predictions directory
 prediction_directory = 'UCF-101-predictions-3d/'
@@ -92,62 +92,87 @@ mean = np.asarray([0.485, 0.456, 0.406],np.float32)
 std = np.asarray([0.229, 0.224, 0.225],np.float32)
 model.eval()
 
+# num_of_frames = 16
+# height = width = 224
 for i in range(len(test[0])):
 
     t1 = time.time()
 
     index = random_indices[i]
 
-    filename = test[0][index]
-    filename = filename.replace('.avi','.hdf5')
-    filename = filename.replace('UCF-101','UCF-101-hdf5')
+    # filename = test[0][index]
+    # filename = filename.replace('.avi','.hdf5')
+    # filename = filename.replace('UCF-101','UCF-101-hdf5')
 
-    h = h5py.File(filename,'r')
-    nFrames = len(h['video'])
+    # h = h5py.File(filename,'r')
+    # nFrames = len(h['video']) - 1
+    # frame_index = np.random.randint(nFrames - num_of_frames)
+    # video = h['video'][frame_index:(frame_index + num_of_frames)]
+    # nFrames = len(h['video'])
 
-    data = np.zeros((nFrames,3,IMAGE_SIZE,IMAGE_SIZE),dtype=np.float32)
+    data = loadSequence((test[0][index], False))
+    # data = []
+    # for frame in video:
+    #     frame = cv2.resize(frame, (width, height))
+    #     frame = frame.astype(np.float32)
+    #     frame = frame / 255.0
+    #     frame = (frame - mean) / std
+    #     data.append(frame)
+    # data = np.asarray(data)
 
-    for j in range(nFrames):
-        frame = h['video'][j]
-        frame = frame.astype(np.float32)
-        frame = cv2.resize(frame,(IMAGE_SIZE,IMAGE_SIZE))
-        frame = frame/255.0
-        frame = (frame - mean)/std
-        frame = frame.transpose(2,0,1)
-        data[j,:,:,:] = frame
-    h.close()
+    # data = np.zeros((nFrames,3,IMAGE_SIZE,IMAGE_SIZE),dtype=np.float32) # [175, 3, 224, 224]
 
-    prediction = np.zeros((nFrames, NUM_CLASSES), dtype=np.float32)
+    # for j in range(nFrames):
+    #     frame = h['video'][j]
+    #     frame = frame.astype(np.float32)
+    #     frame = cv2.resize(frame,(IMAGE_SIZE,IMAGE_SIZE))
+    #     frame = frame/255.0
+    #     frame = (frame - mean)/std
+    #     frame = frame.transpose(2,0,1)
+    #     data[j,:,:,:] = frame
+    # h.close()
+    #
+    # prediction = np.zeros((nFrames, NUM_CLASSES), dtype=np.float32)
+    #
+    # loop_i = list(range(0, nFrames, 200))
+    # loop_i.append(nFrames)
 
-    loop_i = list(range(0, nFrames, 200))
-    loop_i.append(nFrames)
+    if data.size == 0:
+        continue
+    x = np.expand_dims(np.asarray(data, dtype=np.float32), axis=0)
+    x = Variable(torch.FloatTensor(x)).cuda().contiguous()
+    y = test[1][index:index + 1]
+    y = torch.from_numpy(y).cuda()
 
-    for j in range(len(loop_i) - 1):
-        data_batch = data[loop_i[j]:loop_i[j + 1]]
+    # for j in range(len(loop_i) - 1):
+    #     data_batch = data[loop_i[j]:loop_i[j + 1]]
+
+    with torch.no_grad():
+        x = np.asarray(data_batch, dtype=np.float32)
+        x = Variable(torch.FloatTensor(x)).cuda().contiguous()
 
         with torch.no_grad():
-            x = np.asarray(data_batch, dtype=np.float32)
-            x = Variable(torch.FloatTensor(x)).cuda().contiguous()
+            h = model.conv1(x) # expect [64, 3, 7, 7, 7]
+            h = model.bn1(h)
+            h = model.relu(h)
+            h = model.maxpool(h)
 
-            with torch.no_grad():
-                h = model.conv1(x)
-                h = model.bn1(h)
-                h = model.relu(h)
-                h = model.maxpool(h)
+            h = model.layer1(h)
+            h = model.layer2(h)
+            h = model.layer3(h)
+            h = model.layer4[0](h)
+            # h = model.layer4[1](h)
 
-                h = model.layer1(h)
-                h = model.layer2(h)
-                h = model.layer3(h)
-                h = model.layer4[0](h)
-                # h = model.layer4[1](h)
+            h = model.avgpool(h)
 
-                h = model.avgpool(h)
+            h = h.view(h.size(0), -1)
+            output = model.fc(h)
 
-                h = h.view(h.size(0), -1)
-                output = model.fc(h)
-
-        prediction[loop_i[j]:loop_i[j + 1]] = output.cpu().numpy()
-
+    # prediction[loop_i[j]:loop_i[j + 1]] = output.cpu().numpy()
+    prediction = output.cpu().numpy()
+    filename = test[0][index]
+    filename = filename.replace('.avi', '.hdf5')
+    filename = filename.replace('UCF-101', 'UCF-101-hdf5')
 
     filename = filename.replace(data_directory + 'UCF-101-hdf5/', prediction_directory)
     if (not os.path.isfile(filename)):
@@ -155,8 +180,10 @@ for i in range(len(test[0])):
             h.create_dataset('predictions', data=prediction)
 
     # softmax
-    for j in range(prediction.shape[0]):
-        prediction[j] = np.exp(prediction[j]) / np.sum(np.exp(prediction[j]))
+    # for j in range(prediction.shape[0]):
+    #     prediction[j] = np.exp(prediction[j]) / np.sum(np.exp(prediction[j]))
+
+    prediction = np.exp(prediction) / np.sum(np.exp(prediction))
 
     prediction = np.sum(np.log(prediction), axis=0)
     argsort_pred = np.argsort(-prediction)[0:10]
@@ -170,8 +197,10 @@ for i in range(len(test[0])):
     if (np.any(argsort_pred[:] == label)):
         acc_top10 += 1.0
 
-    print('i:%d nFrames:%d t:%f (%f,%f,%f)'
-          % (i, nFrames, time.time() - t1, acc_top1 / (i + 1), acc_top5 / (i + 1), acc_top10 / (i + 1)))
+    # print('i:%d nFrames:%d t:%f (%f,%f,%f)'
+    #       % (i, nFrames, time.time() - t1, acc_top1 / (i + 1), acc_top5 / (i + 1), acc_top10 / (i + 1)))
+    print('i:%d t:%f (%f,%f,%f)'
+          % (i, time.time() - t1, acc_top1 / (i + 1), acc_top5 / (i + 1), acc_top10 / (i + 1)))
 
 number_of_examples = np.sum(confusion_matrix,axis=1)
 for i in range(NUM_CLASSES):
