@@ -147,26 +147,26 @@ for i in range(len(test[0])):
     # for j in range(len(loop_i) - 1):
     #     data_batch = data[loop_i[j]:loop_i[j + 1]]
 
+    # with torch.no_grad():
+    #     x = np.asarray(data_batch, dtype=np.float32)
+    #     x = Variable(torch.FloatTensor(x)).cuda().contiguous()
+
     with torch.no_grad():
-        x = np.asarray(data_batch, dtype=np.float32)
-        x = Variable(torch.FloatTensor(x)).cuda().contiguous()
+        h = model.conv1(x) # expect [64, 3, 7, 7, 7]
+        h = model.bn1(h)
+        h = model.relu(h)
+        h = model.maxpool(h)
 
-        with torch.no_grad():
-            h = model.conv1(x) # expect [64, 3, 7, 7, 7]
-            h = model.bn1(h)
-            h = model.relu(h)
-            h = model.maxpool(h)
+        h = model.layer1(h)
+        h = model.layer2(h)
+        h = model.layer3(h)
+        h = model.layer4[0](h)
+        # h = model.layer4[1](h)
 
-            h = model.layer1(h)
-            h = model.layer2(h)
-            h = model.layer3(h)
-            h = model.layer4[0](h)
-            # h = model.layer4[1](h)
+        h = model.avgpool(h)
 
-            h = model.avgpool(h)
-
-            h = h.view(h.size(0), -1)
-            output = model.fc(h)
+        h = h.view(h.size(0), -1)
+        output = model.fc(h)
 
     # prediction[loop_i[j]:loop_i[j + 1]] = output.cpu().numpy()
     prediction = output.cpu().numpy()
