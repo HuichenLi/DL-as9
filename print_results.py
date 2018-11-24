@@ -3,7 +3,7 @@ from helperFunctions import getUCF101
 NUM_CLASSES = 101
 
 
-def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.npy'):
+def print_confusion_matrix(class_list, file_path):
     confusion_matrix = np.load(file_path)
 
     results = np.diag(confusion_matrix)
@@ -34,7 +34,7 @@ def print_confusion_matrix(class_list, file_path='single_frame_confusion_matrix.
 def main():
     data_directory = '/projects/training/bauh/AR/'
     class_list, train, test = getUCF101(base_directory=data_directory)
-    print_confusion_matrix(class_list=class_list, file_path='3d_resnet_confusion_matrix.npy')
+    print_confusion_matrix(class_list=class_list, file_path='part3_confusion_matrix.npy')
 
 
 if __name__ == '__main__':
