@@ -45,6 +45,7 @@ for i in range(0,len(test[0])-batch_size,batch_size):
         continue
 
     x = np.asarray(data,dtype=np.float32)
+    print(x.shape)
     x = Variable(torch.FloatTensor(x)).cuda().contiguous()
 
     y = test[1][random_indices[i:(batch_size+i)]]
